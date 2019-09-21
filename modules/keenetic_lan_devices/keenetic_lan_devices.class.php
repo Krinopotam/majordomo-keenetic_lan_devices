@@ -408,37 +408,46 @@
          */
         private function getAllDevicesInfo()
         {
-            if ($this->config['API_URL']=="") {return NULL;}
+            try
+            {
+                if ($this->config['API_URL']=="") {return NULL;}
 
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, 'http://'.$this->config['API_URL'].'/ci');
-            //curl_setopt($ch, CURLOPT_POSTFIELDS, '<request id="0"><command name="show dyndns"><profile>_WEBADMIN</profile><name>ISP</name></command></request><request id="1"><command name="show interface stat"><name>ISP</name></command></request>');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, '<request id="0"><command name="show ip hotspot"></command></request>');
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
-            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-            curl_setopt($ch, CURLOPT_USERPWD, $this->config['ADMIN_USERNAME'].':'.$this->config['ADMIN_PASSWORD']);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            $data = curl_exec($ch);
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, 'http://'.$this->config['API_URL'].'/ci');
+                //curl_setopt($ch, CURLOPT_POSTFIELDS, '<request id="0"><command name="show dyndns"><profile>_WEBADMIN</profile><name>ISP</name></command></request><request id="1"><command name="show interface stat"><name>ISP</name></command></request>');
+                curl_setopt($ch, CURLOPT_POSTFIELDS, '<request id="0"><command name="show ip hotspot"></command></request>');
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/xml']);
+                curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+                curl_setopt($ch, CURLOPT_USERPWD, $this->config['ADMIN_USERNAME'].':'.$this->config['ADMIN_PASSWORD']);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                $data = curl_exec($ch);
 
-             if(curl_errno($ch)) {exit;}
+                if(curl_errno($ch)) {return NULL;}
+                if(strpos($data, "401 Authorization")>0) {echo ("dsdsds");return NULL;}
 
-            $objectResult = new SimpleXMLElement($data);
+                $objectResult = new SimpleXMLElement($data);
 
-            $result = array();
-            foreach ($objectResult->children()->children() as $node) {
-                if ($node->mac=='' || $node->registered!="yes") {continue;}
+                $result = array();
+                foreach ($objectResult->children()->children() as $node) {
+                    if ($node->mac=='' || $node->registered!="yes") {continue;}
 
-                $result[(string)$node->mac] = array();
-                $result[(string)$node->mac]["MAC"] = (string)$node->mac;
-                $result[(string)$node->mac]["STATUS"] = ((string)$node->link=='up' ? 1 : 0);
-                $result[(string)$node->mac]["STATUS_TXT"] = ((string)$node->link=='up' ? 'Online' : 'Offline');
-                $result[(string)$node->mac]["HOST_NAME"] = (string)$node->hostname;
-                $result[(string)$node->mac]["DEVICE_NAME"] = (string)$node->name;
-                $result[(string)$node->mac]["IP"] = (string)$node->ip;
-                $result[(string)$node->mac]["REGISTERED"] = (string)$node->registered;
+                    $result[(string)$node->mac] = array();
+                    $result[(string)$node->mac]["MAC"] = (string)$node->mac;
+                    $result[(string)$node->mac]["STATUS"] = ((string)$node->link=='up' ? 1 : 0);
+                    $result[(string)$node->mac]["STATUS_TXT"] = ((string)$node->link=='up' ? 'Online' : 'Offline');
+                    $result[(string)$node->mac]["HOST_NAME"] = (string)$node->hostname;
+                    $result[(string)$node->mac]["DEVICE_NAME"] = (string)$node->name;
+                    $result[(string)$node->mac]["IP"] = (string)$node->ip;
+                    $result[(string)$node->mac]["REGISTERED"] = (string)$node->registered;
+                }
+
+                return $result;
             }
-
-            return $result;
+            catch (Exception $e) {
+                // код который может обработать исключение
+                //echo $e->getMessage();
+                return NULL;
+            }
         }
 
         /**
