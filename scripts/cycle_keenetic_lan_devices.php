@@ -16,16 +16,14 @@
     $keenetic_lan_devices_module->getConfig();
 
     $sleepTime = (int)$keenetic_lan_devices_module->config['UPDATE_PERIOD'];
-    debmes($sleepTime);
+
+    if ($sleepTime==0)
+    {
+        $sleepTime = 30;
+    }
 
     while (TRUE)
     {
-        if ($sleepTime==0)
-        {
-            sleep(10);
-            continue;
-        }
-
         setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
 
         $keenetic_lan_devices_module->processCycle();
