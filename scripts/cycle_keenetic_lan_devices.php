@@ -1,5 +1,4 @@
 <?php
-
     chdir(dirname(__FILE__) . '/../');
     include_once("./config.php");
     include_once("./lib/loader.php");
@@ -13,6 +12,7 @@
     //$ctl = new control_modules();
     include_once(DIR_MODULES . 'keenetic_lan_devices/keenetic_lan_devices.class.php');
     $keenetic_lan_devices_module = new keenetic_lan_devices();
+    setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
 
     while (TRUE)
     {
@@ -30,7 +30,11 @@
 
         $keenetic_lan_devices_module->processCycle();
 
-        if (file_exists('./reboot') || IsSet($_GET['onetime'])) { exit; }
+        if (file_exists('./reboot') || IsSet($_GET['onetime']))
+        {
+            $db->Disconnect();
+            exit;
+        }
 
         sleep($sleepTime);
     }
