@@ -1,46 +1,30 @@
 <!-- table zwave_devices search -->
 <div>
-    [ <a href="#" onClick="$('#api_settings').toggle();return false;">
-    <#LANG_SETUP#>
-</a> ]
+    [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
 </div>
 <div style="display:none" id='api_settings'>
     &nbsp;
     <form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
         <fieldset>
             <div class="form-group">
-                <label class="control-label" [#if ERR_API_URL#] style="color:red;font-weight:bold" [#endif#]>
-                    IP роутера*:
-                </label>
-
+                <label class="control-label" [#if ERR_API_URL#] style="color:red;font-weight:bold" [#endif#]>IP роутера*:</label>
                 <div class="controls"><input type="text" name="api_url" value="[#API_URL#]" class="input"></div>
             </div>
             <div class="form-group">
-                <label class="control-label" [#if ERR_ADMIN_USERNAME#] style="color:red;font-weight:bold" [#endif#]>
-                    Логин*:
-                </label>
-
+                <label class="control-label" [#if ERR_ADMIN_USERNAME#] style="color:red;font-weight:bold" [#endif#]>Логин*:</label>
                 <div class="controls"><input type="text" name="admin_username" value="[#ADMIN_USERNAME#]" class="input">
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label" [#if ERR_ADMIN_PASSWORD#] style="color:red;font-weight:bold" [#endif#]>
-                    Пароль*:
-                </label>
-
+                <label class="control-label" [#if ERR_ADMIN_PASSWORD#] style="color:red;font-weight:bold" [#endif#]>Пароль*:</label>
                 <div class="controls"><input type="password" name="admin_password" value="[#ADMIN_PASSWORD#]" class="input"></div>
             </div>
             <div class="form-group">
-                <label class="control-label" [#if ERR_UPDATE_PERIOD#] style="color:red;font-weight:bold" [#endif#]>
-                    Период опроса (сек.)*:
-                </label>
-
+                <label class="control-label" [#if ERR_UPDATE_PERIOD#] style="color:red;font-weight:bold" [#endif#]>Период опроса (сек.)*:</label>
                 <div class="controls"><input type="text" name="update_period" value="[#UPDATE_PERIOD#]" class="input"></div>
             </div>
             <div class="form-actions">
-                <button type="submit" name="subm" value="Submit" class="btn btn-primary">
-                    <#LANG_UPDATE#>
-                </button>
+                <button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
                 <input type="hidden" name="view_mode" value="update_settings">
                 <input type="hidden" name="mode" value="update">
             </div>
@@ -60,14 +44,12 @@
 [#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
 <ul class="nav nav-tabs">
     <li
-    [#if TAB=""#] class="active"[#endif#]>
-    <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=">
-        <#LANG_GENERAL#>
-    </a>
+        [#if TAB=""#] class="active"[#endif#]>
+        <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a>
     </li>
     <li
-    [#if TAB="data"#] class="active"[#endif#]>
-    <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
+        [#if TAB="data"#] class="active"[#endif#]>
+        <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
     </li>
 </ul>
 &nbsp;<br/>

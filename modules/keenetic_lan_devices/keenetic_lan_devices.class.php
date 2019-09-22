@@ -613,7 +613,6 @@
  keenetic_lan_devices: HOST_NAME varchar(255) NOT NULL DEFAULT ''
  keenetic_lan_devices: IP varchar(15) NOT NULL DEFAULT ''
  keenetic_lan_devices: REGISTERED varchar(10) NOT NULL DEFAULT ''
- keenetic_lan_devices: UPDATE_PERIOD int(10) NOT NULL DEFAULT '0'
  keenetic_lan_devices: ONLINE int(1) NOT NULL DEFAULT '0'
  keenetic_lan_devices: UPDATED datetime
  keenetic_lan_devices_values: ID int(10) unsigned NOT NULL auto_increment
