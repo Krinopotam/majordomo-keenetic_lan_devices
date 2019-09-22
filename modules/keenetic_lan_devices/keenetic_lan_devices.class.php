@@ -428,6 +428,7 @@
                 $objectResult = new SimpleXMLElement($data);
 
                 $result = array();
+
                 foreach ($objectResult->children()->children() as $node) {
                     if ($node->mac=='' || $node->registered!="yes") {continue;}
 
@@ -470,6 +471,30 @@
                 $rec_val['VALUE'] = $values['STATUS'];
                 $rec_vals[] = $rec_val;
             }
+
+            if (isset($values['MAC']))
+            {
+                $rec_val['DEVICE_ID'] = $deviceId;
+                $rec_val['TITLE'] = "mac";
+                $rec_val['DESCRIPTION'] = " (R/O) MAC";
+                $rec_val['VALUE'] = $values['MAC'];
+                $rec_vals[] = $rec_val;
+            }
+
+            if (isset($values['IP']))
+            {
+                $rec_val['DEVICE_ID'] = $deviceId;
+                $rec_val['TITLE'] = "ip";
+                $rec_val['DESCRIPTION'] = " (R/O) IP";
+                $rec_val['VALUE'] = $values['IP'];
+                $rec_vals[] = $rec_val;
+            }
+
+            $rec_val['DEVICE_ID'] = $deviceId;
+            $rec_val['TITLE'] = "updated";
+            $rec_val['DESCRIPTION'] = " (R/O) Обновлено";
+            $rec_val['VALUE'] = date("Y-m-d H:i:s");
+            $rec_vals[] = $rec_val;
 
             foreach ($rec_vals as $rec_val)
             {
