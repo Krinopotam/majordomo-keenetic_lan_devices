@@ -13,17 +13,19 @@
     //$ctl = new control_modules();
     include_once(DIR_MODULES . 'keenetic_lan_devices/keenetic_lan_devices.class.php');
     $keenetic_lan_devices_module = new keenetic_lan_devices();
-    $keenetic_lan_devices_module->getConfig();
-
-    $sleepTime = (int)$keenetic_lan_devices_module->config['UPDATE_PERIOD'];
-
-    if ($sleepTime==0)
-    {
-        $sleepTime = 30;
-    }
 
     while (TRUE)
     {
+        $keenetic_lan_devices_module->getConfig();
+        $sleepTime = (int)$keenetic_lan_devices_module->config['UPDATE_PERIOD'];
+
+        if ($sleepTime == 0) //'период обновления не указан, значит не обновляем, пока не будет указан
+        {
+            sleep(30);
+            setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
+            continue;
+        }
+
         setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
 
         $keenetic_lan_devices_module->processCycle();
