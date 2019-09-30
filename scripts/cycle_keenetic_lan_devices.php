@@ -12,20 +12,20 @@
     //$ctl = new control_modules();
     include_once(DIR_MODULES . 'keenetic_lan_devices/keenetic_lan_devices.class.php');
     $keenetic_lan_devices_module = new keenetic_lan_devices();
-    setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
+    $keenetic_lan_devices_module->getConfig();
+    $sleepTime = (int)$keenetic_lan_devices_module->config['UPDATE_PERIOD'];
+
+    if ($sleepTime == 0)
+    {
+        setGlobal('cycle_keenetic_lan_devices', 'stop');
+        setGlobal('cycle_keenetic_lan_devices', '0');
+        exit;
+    }
+
+    setGlobal('cycle_keenetic_lan_devices', '1');
 
     while (TRUE)
     {
-        $keenetic_lan_devices_module->getConfig();
-        $sleepTime = (int)$keenetic_lan_devices_module->config['UPDATE_PERIOD'];
-
-        if ($sleepTime == 0) //'период обновления не указан, значит не обновляем, пока не будет указан
-        {
-            sleep(30);
-            setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
-            continue;
-        }
-
         setGlobal((str_replace('.php', '', basename(__FILE__))) . 'Run', time(), 1);
 
         $keenetic_lan_devices_module->processCycle();

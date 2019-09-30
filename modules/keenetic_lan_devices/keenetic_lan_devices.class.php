@@ -171,7 +171,7 @@
             $out['ADMIN_PASSWORD'] = $this->config['ADMIN_PASSWORD'];
 
             $out['UPDATE_PERIOD'] = $this->config['UPDATE_PERIOD'];
-            if (!$out['UPDATE_PERIOD']) { $out['UPDATE_PERIOD'] = '10'; }
+            //if (!$out['UPDATE_PERIOD']) { $out['UPDATE_PERIOD'] = '10'; }
 
             if ($this->view_mode == 'update_settings')
             {
@@ -185,6 +185,7 @@
                 $this->config['UPDATE_PERIOD'] = $update_period;
 
                 $this->saveConfig();
+                setGlobal('cycle_keenetic_lan_devices', 'restart');
                 $this->redirect("?");
             }
             if (isset($this->data_source) && !$_GET['data_source'] && !$_POST['data_source'])
@@ -285,10 +286,9 @@
          */
         function delete_keenetic_lan_devices($id)
         {
-            $rec = SQLSelectOne("SELECT * FROM keenetic_lan_devices WHERE ID='" . DBSafe($id) . "'");
             // some action for related tables
-            SQLExec("DELETE FROM keenetic_lan_devices WHERE ID='" . DBSafe($rec['ID']) . "'");
-            SQLExec("DELETE FROM keenetic_lan_devices_values WHERE DEVICE_ID='" . DBSafe($rec['ID']) . "'");
+            SQLExec("DELETE FROM keenetic_lan_devices WHERE ID='" . DBSafe($id) . "'");
+            SQLExec("DELETE FROM keenetic_lan_devices_values WHERE DEVICE_ID='" . DBSafe($id) . "'");
         }
 
         /**
@@ -361,10 +361,14 @@
 
             $equipmentsInDb = SQLSelect("SELECT * FROM keenetic_lan_devices ");
 
+            $previousStatus=0;
+
             //проходим по устройствам, которые есть в БД
             foreach ($equipmentsInDb as $key => $value)
             {
                 if (!isset($equipments[$value["MAC"]])) {continue;}
+
+                $previousStatus=(int)$value["ONLINE"];
 
                 $value["HOST_NAME"] = $equipments[$value["MAC"]]["HOST_NAME"];
                 $value["DEVICE_NAME"] = $equipments[$value["MAC"]]["DEVICE_NAME"];
@@ -374,7 +378,7 @@
                 $value['UPDATED'] = date('Y-m-d H:i:s');
                 SQLUpdate('keenetic_lan_devices', $value);
 
-                $this->updateValues($value['ID'], $equipments[$value["MAC"]]);
+                $this->updateValues($value['ID'], $equipments[$value["MAC"]], $previousStatus);
 
                 unset($equipments[$value["MAC"]]);
             }
@@ -394,11 +398,13 @@
                 $newEquipment["REGISTERED"] = $value["REGISTERED"];
                 $newEquipment["ONLINE"] = $value["STATUS"];
 
+                $previousStatus = $value["STATUS"]==0 ? 1 : 0;
+
                 $newEquipment['ID'] = SQLInsert('keenetic_lan_devices', $newEquipment);
 
                 if (!$newEquipment['ID']) {return;}
 
-                $this->updateValues($newEquipment['ID'], $value);
+                $this->updateValues($newEquipment['ID'], $value, $previousStatus);
             }
         }
 
@@ -455,8 +461,9 @@
          * Обновление значений устройства
          * @param int $deviceId устройства в БД
          * @param array $values значения устройства
+         * @param $previousStatus - значения предыдущего статуса в БД
          */
-        function updateValues($deviceId, $values)
+        function updateValues($deviceId, $values, $previousStatus)
         {
             if (!is_array($values)) {return;}
 
@@ -470,6 +477,15 @@
                 $rec_val['DESCRIPTION'] = " (R/O) Статус";
                 $rec_val['VALUE'] = $values['STATUS'];
                 $rec_vals[] = $rec_val;
+
+                if ($previousStatus != $values['STATUS'])
+                {
+                    $rec_val['DEVICE_ID'] = $deviceId;
+                    $rec_val['TITLE'] = "status_updated";
+                    $rec_val['DESCRIPTION'] = " (R/O) Последнее изменение статуса";
+                    $rec_val['VALUE'] = date("Y-m-d H:i:s");
+                    $rec_vals[] = $rec_val;
+                }
             }
 
             if (isset($values['MAC']))
@@ -595,7 +611,7 @@
                 mkdir(ROOT . 'cms/debmes', 0777);
             }
 
-            $today_file = ROOT . 'cms/debmes/log_' . date('Y-m-d') . '-keenetic_lan_devices.php.txt';
+            $today_file = ROOT . 'cms/debmes/' . date('Y-m-d') . '-keenetic_lan_devices.txt';
             $data = date("H:i:s") . " " . $message . "\n";
             file_put_contents($today_file, $data, FILE_APPEND | LOCK_EX);
         }

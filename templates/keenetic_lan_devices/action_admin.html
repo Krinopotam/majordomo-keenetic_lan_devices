@@ -1,8 +1,11 @@
-<!-- table zwave_devices search -->
-<div>
-    [ <a href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> ]
+<!-- table keenetic_lan_devices search -->
+<div class="row">
+    <div class="col-md-6">
+        <a class="btn btn-default" href="#api_settings" data-toggle="collapse"><i class="glyphicon glyphicon-cog"></i> <#LANG_SETUP#></a>
+    </div>
 </div>
-<div style="display:none" id='api_settings'>
+
+<div class="collapse" id='api_settings'>
     &nbsp;
     <form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
         <fieldset>
@@ -24,7 +27,7 @@
                 <div class="controls"><input type="text" name="update_period" value="[#UPDATE_PERIOD#]" class="input"></div>
             </div>
             <div class="form-actions">
-                <button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
+                <button type="submit" name="subm" value="Submit" class="btn btn-primary">Сохранить</button>
                 <input type="hidden" name="view_mode" value="update_settings">
                 <input type="hidden" name="mode" value="update">
             </div>
