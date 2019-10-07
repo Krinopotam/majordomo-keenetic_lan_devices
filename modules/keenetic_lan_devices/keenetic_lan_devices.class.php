@@ -330,10 +330,6 @@
             $this->getConfig();
 
             $this->updateDevices();
-
-            //DebMes("Цикл keenetic_lan_devices отработал.");
-            //$this->debug ($equipments);
-            //DebMes($this->config);
         }
 
         /**
@@ -429,7 +425,11 @@
                 $data = curl_exec($ch);
 
                 if(curl_errno($ch)) {return NULL;}
-                if(strpos($data, "401 Authorization")>0) {echo ("dsdsds");return NULL;}
+                if(strpos($data, "401 Authorization")>0)
+                {
+                    DebMes("Ошибка авторизации на маршрутизаторе", 'keenetic_lan_devices');
+                    return NULL;
+                }
 
                 $objectResult = new SimpleXMLElement($data);
 
@@ -448,6 +448,23 @@
                     $result[(string)$node->mac]["REGISTERED"] = (string)$node->registered;
                 }
 
+                //получаем статус подключения к интернету
+                curl_setopt($ch, CURLOPT_POSTFIELDS, '<request id="0"><command name="show internet status"></command></request>');
+                $data = curl_exec($ch);
+                if(curl_errno($ch)) {return $result;}
+
+                $objectResult = new SimpleXMLElement($data);
+
+                $gateWayMac = "11:11:11:11:11:11";
+                $result[$gateWayMac]["MAC"] = $gateWayMac;
+                $result[$gateWayMac]["STATUS"] = ((string)$objectResult->children()->children()->internet=='yes' ? 1 : 0);
+                $result[$gateWayMac]["STATUS_TXT"] = ((string)$objectResult->children()->children()->internet=='yes' ? 'Online' : 'Offline');
+                $result[$gateWayMac]["HOST_NAME"] = (string)$objectResult->children()->children()->gateway->interface;
+                $result[$gateWayMac]["DEVICE_NAME"] = "Интернет";
+                $result[$gateWayMac]["IP"] = (string)$objectResult->children()->children()->gateway->address;
+                $result[$gateWayMac]["REGISTERED"] = "yes";
+
+                curl_close($ch);
                 return $result;
             }
             catch (Exception $e) {
@@ -553,8 +570,6 @@
             {
                 $linkedValue = getGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY']);
 
-                //$this->debug ("$linkedValue".$linkedValue);
-
                 if ($linkedValue!=$rec_val['VALUE'])
                 {
                     setGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY'], $rec_val['VALUE'], array($this->name => '0'));
@@ -587,33 +602,6 @@
                 $params['value']=$rec_val['VALUE'];
                 runScript($rec_val['SCRIPT_ID'], $params);
             }
-        }
-
-        /**
-         * Выводит в log файл объект (print_r)
-         * @param mixed $content
-         */
-        function debug($content)
-        {
-            $this->log(print_r($content, TRUE));
-        }
-
-        /**
-         * Выводит в log файл строку
-         * @param string $message
-         */
-        function log($message)
-        {
-            //echo $message . "\n";
-            // DEBUG MESSAGE LOG
-            if (!is_dir(ROOT . 'cms/debmes'))
-            {
-                mkdir(ROOT . 'cms/debmes', 0777);
-            }
-
-            $today_file = ROOT . 'cms/debmes/' . date('Y-m-d') . '-keenetic_lan_devices.txt';
-            $data = date("H:i:s") . " " . $message . "\n";
-            file_put_contents($today_file, $data, FILE_APPEND | LOCK_EX);
         }
 
         //*******************End of my functions************************************************
