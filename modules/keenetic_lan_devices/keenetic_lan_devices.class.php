@@ -541,8 +541,8 @@
          * @param $rec_val
          * @param int $params
          */
-        function processValues($device_id, $rec_val, $params = 0) {
-
+        function processValues($device_id, $rec_val, $params = 0)
+        {
             $old_rec = SQLSelectOne("SELECT * FROM keenetic_lan_devices_values WHERE DEVICE_ID=".(int)$device_id." AND TITLE LIKE '".DBSafe($rec_val['TITLE'])."'");
 
             $old_value = "";
@@ -565,12 +565,12 @@
                 SQLUpdate('keenetic_lan_devices_values', $rec_val);
             }
 
-            //если вдруг связанное свойство пустое (только привязали), то сразу его обновляем текущим значением
             if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_PROPERTY'])
             {
                 $linkedValue = getGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY']);
 
-                if ($linkedValue!=$rec_val['VALUE'])
+                //если связанное свойство не равно текущему значению или текущее значение изменилось, то обновляем его текущим значением
+                if ($linkedValue!=$rec_val['VALUE'] || $old_value != $rec_val['VALUE'])
                 {
                     setGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY'], $rec_val['VALUE'], array($this->name => '0'));
                 }
@@ -579,16 +579,11 @@
             // Если значение метрики не изменилось, то выходим.
             if ($old_value == $rec_val['VALUE']) return;
 
-            // Иначе обновляем привязанное свойство.
-            if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_PROPERTY']) {
-                setGlobal($rec_val['LINKED_OBJECT'] . '.' . $rec_val['LINKED_PROPERTY'], $rec_val['VALUE'], array($this->name => '0'));
-            }
-
             // И вызываем привязанный метод.
-            if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_METHOD']) {
-                if (!is_array($params)) {
-                    $params = array();
-                }
+            if ($rec_val['LINKED_OBJECT'] && $rec_val['LINKED_METHOD'])
+            {
+                if (!is_array($params)) { $params = array(); }
+
                 $params['VALUE'] = $rec_val['VALUE'];
                 $params['OLD_VALUE'] = $old_value;
                 $params['NEW_VALUE'] = $rec_val['VALUE'];
@@ -597,7 +592,8 @@
             }
 
             // И вызываем привязанный скрипт
-            if ($rec_val['SCRIPT_ID']) {
+            if ($rec_val['SCRIPT_ID'])
+            {
                 $params['VALUE']=$rec_val['VALUE'];
                 $params['value']=$rec_val['VALUE'];
                 runScript($rec_val['SCRIPT_ID'], $params);
